@@ -20,34 +20,15 @@ android {
 }
 
 repositories {
-    maven {
-        url = 'https://maven.brott.dev/'
-    }
-
-    maven {
-        url = 'https://mymaven.bylazar.com/releases'
-    }
-
-    maven {
-        url "https://repo.dairy.foundation/releases"
-    }
-
-    maven {
-        url "https://repo.dairy.foundation/snapshots"
-    }
+    maven { url = 'https://maven.brott.dev/' }
+    maven { url = 'https://repo.dairy.foundation/releases' }
 }
 
 dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
-    // Existing SolversLib support used by other team code.
-    implementation "org.solverslib:core:0.3.4"
-    implementation "org.solverslib:pedroPathing:0.3.4"
-
-    // FTC Dashboard remains available for existing utilities.
+    // Existing SolversLib support used by the robot code.
+    // The SolversLib core dependency is declared centrally in ../build.dependencies.gradle.
     implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
-
-    // Pedro Pathing, its telemetry module, and Panels are declared centrally
-    // in ../build.dependencies.gradle. Do not duplicate them here.
 }
