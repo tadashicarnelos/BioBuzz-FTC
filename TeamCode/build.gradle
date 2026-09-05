@@ -8,10 +8,6 @@
 // please think carefully as to whether such customizations are really necessary
 // before doing so.
 
-
-// Custom definitions may go here
-
-// Include common definitions from above.
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
@@ -45,18 +41,17 @@ dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
-    // SolversLib: Latest Stable Version
+    // Existing SolversLib support used by other team code.
+    implementation "org.solverslib:core:0.3.4"
+    implementation "org.solverslib:pedroPathing:0.3.4"
 
-    implementation "org.solverslib:core:0.3.4" // core
-    implementation "org.solverslib:pedroPathing:0.3.4" // pedroPathing
-    //    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
+    // FTC Dashboard remains available for existing utilities.
+    implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
 
-    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
-
-    // Pedro Pathing
-    implementation 'com.pedropathing:ftc:2.0.6'
+    // Official Pedro Pathing.
+    implementation 'com.pedropathing:ftc:2.1.2'
     implementation 'com.pedropathing:telemetry:1.0.0'
 
-    // Panels Dashboard
+    // Panels Dashboard for live tuning and field visualization.
     implementation "com.bylazar:fullpanels:1.0.12"
 }
