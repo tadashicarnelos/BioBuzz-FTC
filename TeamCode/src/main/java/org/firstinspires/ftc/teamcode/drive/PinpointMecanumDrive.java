@@ -4,7 +4,6 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Pose2D;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -30,12 +29,11 @@ public class PinpointMecanumDrive {
     private final DcMotorEx frontRight;
     private final DcMotorEx backLeft;
     private final DcMotorEx backRight;
-
     private final GoBildaPinpointDriver pinpoint;
 
-    // Tune these values from the real robot measurements.
-    // X pod: sideways offset from the robot center, in millimeters.
-    // Y pod: forward/backward offset from the robot center, in millimeters.
+    // TODO: replace these with measured pod offsets on the real robot.
+    // X pod = sideways offset from the robot center, in millimeters.
+    // Y pod = forward/backward offset from the robot center, in millimeters.
     private static final double PINPOINT_X_OFFSET_MM = 0.0;
     private static final double PINPOINT_Y_OFFSET_MM = 0.0;
 
@@ -44,7 +42,6 @@ public class PinpointMecanumDrive {
         frontRight = hardwareMap.get(DcMotorEx.class, FRONT_RIGHT_NAME);
         backLeft = hardwareMap.get(DcMotorEx.class, BACK_LEFT_NAME);
         backRight = hardwareMap.get(DcMotorEx.class, BACK_RIGHT_NAME);
-
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, PINPOINT_NAME);
 
         configureMotors();
@@ -52,8 +49,8 @@ public class PinpointMecanumDrive {
     }
 
     private void configureMotors() {
-        // Standard mecanum setup. If a wheel spins the wrong way, change its
-        // direction here rather than adding unexplained minus signs later.
+        // Standard mecanum setup. If the physical motor mounting is different,
+        // change the direction here rather than adding unexplained minus signs.
         frontLeft.setDirection(DcMotor.Direction.FORWARD);
         backLeft.setDirection(DcMotor.Direction.FORWARD);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -71,11 +68,10 @@ public class PinpointMecanumDrive {
     }
 
     private void configurePinpoint() {
-        // These are intentionally placeholders until the physical pod offsets
-        // are measured on the actual robot.
+        // These are placeholders until the physical pod offsets are measured.
         pinpoint.setOffsets(PINPOINT_X_OFFSET_MM, PINPOINT_Y_OFFSET_MM, DistanceUnit.MM);
 
-        // Change this to SWINGARM if those are the pods installed on the robot.
+        // Change this to goBILDA_SWINGARM_POD if that is what the robot uses.
         pinpoint.setEncoderResolution(
                 GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD
         );
@@ -87,8 +83,7 @@ public class PinpointMecanumDrive {
                 GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
 
-        // At the beginning of a match the robot should be stationary while
-        // the Pinpoint calibrates its IMU and establishes the starting pose.
+        // Robot must be stationary during initialization so the IMU can calibrate.
         pinpoint.resetPosAndIMU();
     }
 
@@ -98,17 +93,17 @@ public class PinpointMecanumDrive {
     }
 
     /**
-     * Drive using field-oriented controls.
+     * Field-oriented mecanum drive.
      *
      * @param forward field-relative forward command (-1 to 1)
-     * @param strafe  field-relative right command (-1 to 1)
-     * @param rotate  robot rotation command (-1 to 1)
-     * @param speed   global speed multiplier (0 to 1)
+     * @param strafe field-relative right command (-1 to 1)
+     * @param rotate robot rotation command (-1 to 1)
+     * @param speed global speed multiplier (0 to 1)
      */
     public void driveFieldCentric(double forward, double strafe, double rotate, double speed) {
         double heading = getHeadingRadians();
 
-        // Rotate the field-relative joystick vector into the robot coordinate system.
+        // Convert the field-relative joystick vector into robot-relative coordinates.
         double cos = Math.cos(-heading);
         double sin = Math.sin(-heading);
 
@@ -126,15 +121,10 @@ public class PinpointMecanumDrive {
                         Math.max(Math.abs(backLeftPower),
                                 Math.max(Math.abs(frontRightPower), Math.abs(backRightPower)))));
 
-        frontLeftPower /= max;
-        backLeftPower /= max;
-        frontRightPower /= max;
-        backRightPower /= max;
-
-        frontLeft.setPower(Range.clip(frontLeftPower * speed, -1.0, 1.0));
-        backLeft.setPower(Range.clip(backLeftPower * speed, -1.0, 1.0));
-        frontRight.setPower(Range.clip(frontRightPower * speed, -1.0, 1.0));
-        backRight.setPower(Range.clip(backRightPower * speed, -1.0, 1.0));
+        frontLeft.setPower(Range.clip((frontLeftPower / max) * speed, -1.0, 1.0));
+        backLeft.setPower(Range.clip((backLeftPower / max) * speed, -1.0, 1.0));
+        frontRight.setPower(Range.clip((frontRightPower / max) * speed, -1.0, 1.0));
+        backRight.setPower(Range.clip((backRightPower / max) * speed, -1.0, 1.0));
     }
 
     public void stop() {
