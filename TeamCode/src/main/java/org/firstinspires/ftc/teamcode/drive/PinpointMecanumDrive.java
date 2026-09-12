@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 /**
  * Medium-level mecanum drivetrain using the goBILDA Pinpoint for localization.
@@ -152,6 +153,13 @@ public class PinpointMecanumDrive {
 
     /** Zero heading while keeping the current X/Y position. */
     public void zeroHeading() {
-        pinpoint.setHeading(0.0);
+        Pose2D current = pinpoint.getPosition();
+        pinpoint.setPosition(new Pose2D(
+                DistanceUnit.MM,
+                current.getX(DistanceUnit.MM),
+                current.getY(DistanceUnit.MM),
+                AngleUnit.RADIANS,
+                0.0
+        ));
     }
 }
